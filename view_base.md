@@ -1,9 +1,9 @@
-#View
+# View
 view是什么呢？它是Android中所有控件的基类，可以理解为所有控件的抽象，同时它有一个子类ViewGroup，代表一组view，个人觉得可以理解为布局，那么就代表了控件可以是单个的也可以是一组的。//TO-DO
 
 
 ---
-##view基础知识
+## view基础知识
 1. View的位置参数
 2. MotionEvent
 3. TouchSlop
@@ -12,7 +12,7 @@ view是什么呢？它是Android中所有控件的基类，可以理解为所有
 6. view的滑动
 7. view的生命周期
 
-##1.View的位置参数
+## 1.View的位置参数
 想要学习 view，首先就得了解Android的坐标体系，android中的坐标原点通常是屏幕的左上角，然后x轴正方向水平向右，Y轴正方向水平向下。如下图：
 
 view在屏幕的位置 可以用left top right bottom来表示，看一下view源码中对left的定义，其他的都类似。需要注意的是这里的坐标都是相对坐标，它是当前view相对于它的父容器的坐标。
@@ -45,11 +45,11 @@ x和y分别代表View左上角的坐标，translationX/Y代表各自方向上的
 
 需要注意的是在view平移的过程中，xy是不会改变的，改变的是位移，在属性动画中改变的其实也是translationX/Y这俩个值。
 
-##2.MotionEvent
+## 2.MotionEvent
 
 android将事件信息封装成这个类，然后给我们你使用，我们可以通过这个类来得到坐标信息和触摸的动作
 
-###主要的事件类型有:
+### 主要的事件类型有:
 
 ACTION_DOWN: 表示用户开始触摸.
 
@@ -73,7 +73,7 @@ ACTION_POINTER_UP:一个非主要的手指抬起来了
 
 另外我们可以通过getX,getY，getRawX,getRawY来获取坐标，前者获取的是相对于当前view的左上角的坐标，后者获取的是相对于手机屏幕左上角的坐标。也可以理解为一个获取手指落在view上的坐标，一个获取手机落在屏幕上的坐标。
 
-##3.TouchSlop
+## 3.TouchSlop
 它的定义是：系统所能识别出的被认为是滑动的最小距离。
 
 我们可以通过ViewConfiguration.get(getContext()).getScaledTouchSlop()
@@ -94,7 +94,7 @@ ACTION_POINTER_UP:一个非主要的手指抬起来了
  	   private static final int TOUCH_SLOP = 8;
 
 
-##4.VelocityTracker
+## 4.VelocityTracker
 
 
 > 
@@ -141,7 +141,7 @@ ACTION_POINTER_UP:一个非主要的手指抬起来了
     }
 
 
-##5.GestureDetector
+## 5.GestureDetector
 
  > Creates a GestureDetector with the supplied listener.
  > 
@@ -278,9 +278,9 @@ ACTION_POINTER_UP:一个非主要的手指抬起来了
 ----------
 建议：如果只是监听滑动相关的，建议自己在onTouchEvent中实现，如果要监听双击这种行为的话，就使用GestureDetector
 
-##6.view的滑动
+## 6.view的滑动
 
-###1.scrollTo,scrollBy
+### 1.scrollTo,scrollBy
 
 scrollBy:
 
@@ -321,7 +321,7 @@ scrollTo:
 
 可以看到scrollBy其实也是调用的scrollTo，在滑动过程中mScrollX,mScrollY这俩个值，分别等于view的左边缘到View内容左边缘的水平方向距离，View的上边缘到view内容上边缘的垂直方向距离。注意使用scrollTo和scrollBy这俩个方法只能改变view的内容的位置而不能改变view在布局中的位置。
 
-###2.使用动画
+### 2.使用动画
 使用view动画，属性动画俩种。
 
 1.使用view动画的话需要注意，不会真正改变view的位置，也就是说View动画是对View的影响做操作，view的位置参数是不会改变的，并且如果我们希望动画完成后的状态保留，还必须将fillAfter属性设置为true，否则在动画结束后，动画的结果会消失。
@@ -329,7 +329,7 @@ scrollTo:
 2.使用属性动画，属性动画通过改变translationX,translationY来改变view的位置。从3.0开始属性动画增加到了android中，3.0之前的版本可以使用动画兼容库nineoldandroid来实现属性动画，不过其本质还是view动画。
 
 
-###3.改变布局参数
+### 3.改变布局参数
 即改变LayoutParams,如果我们要左移一个view，我们只需要将这个view左边的marginLeft值增加相应的值即可完成移动。另外也可以通过在当前view的左边添加一个空的view，然后增加这个空view的width。
 
 	    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) getLayoutParams();
@@ -339,9 +339,9 @@ scrollTo:
         requestLayout();
         //或者setLayoutParams(params);
 
-###4.弹性滑动
+### 4.弹性滑动
 
-####1.Scroller
+#### 1.Scroller
 弹性滑动对象,用于实现View的弹性滑动.当使用view的ScrollBy,ScrollTo来进行滑动的时候，是瞬间完成的，使用Scroller就不一样了。Scroller使用的代码是固定的。注意这里的滑动 指的是view内容的滑动而不是view本身的位置改变。
 
         private Scroller mScroller = new Scroller(mContext);
@@ -374,7 +374,7 @@ invalidate（），会是的view重绘，在view的draw方法中会去调用comp
 工作原理：
 Scroller本身是不能实现view的滑动，需要配合View的computeScroll方法才能完成弹性滑动的效果，它不断地让View重绘，而每一次重绘滑动距滑动的起始时间都有一个时间间隔，通过这个时间间隔可以得出View当前的滑动位置，知道了滑动位置可以通过scrollTo方法完成view的滑动，就这样view的每次重绘都会使得view进行小幅度的滑动，许多的小幅度滑动就组成了弹性滑动。
 
-####2.通过动画
+#### 2.通过动画
 可以通过属性动画设置一个值到另外一个值 指定时间段内变化。
 
         ValueAnimator animator = ValueAnimator.ofInt(0, 1).setDuration(1000);
@@ -394,12 +394,12 @@ Scroller本身是不能实现view的滑动，需要配合View的computeScroll方
 
         animator.start();
 
-####3.使用延时策略
+#### 3.使用延时策略
 1.Handler+postInvalidate
 
 2.Thread+sleep
 
-##7.view的生命周期
+## 7.view的生命周期
 	public class LifeCycleView extends View {
 
     private static final String TAG = LifeCycleView.class.getSimpleName();
