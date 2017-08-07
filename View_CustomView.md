@@ -20,3 +20,17 @@ View内部已经提供了post系列的方法了，完全可以替代Handler使�
 停止的时机.. onDetachedFromWindow 。  当包含此View 的Activity退出或者当前View被remove时，会被调用。与此方法对应的是onAttachedToWindow,当包含这个View的Activity启动 ，这个方法会被启动。 当View变得不可见时 我们也需要停止线程 和动画！
 
 ### 2.5 View带有滑动嵌套时，需要处理好滑动冲突！
+
+## 3自定义属性的使用
+1. 在values目录下面 创建自定义属性的XML文件，例如attrs.xml,DictView 是这个自定义属性集合的名字，然后这个集合里面可以有很多的自定义属性。 自定义属性的包括名字和格式
+	    
+		<declare-styleable name="DictView">
+        	<attr name="sbName" format="string"></attr>
+        	<attr name="sbAge" format="integer"></attr>
+    	</declare-styleable>
+
+2. 需要在自定义view的 构造方法中，解析自定义属性
+
+		TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DictView);
+        String str = a.getString(R.styleable.DictView_sbName);
+3. 直接在布局文件中使用,需要注意：为了使用自定义属性，必须得在布局文件中添加schemas声明xmlns:dict="http://schemas.android.com/apk/res-auto"
