@@ -34,3 +34,25 @@ View内部已经提供了post系列的方法了，完全可以替代Handler使�
 		TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DictView);
         String str = a.getString(R.styleable.DictView_sbName);
 3. 直接在布局文件中使用,需要注意：为了使用自定义属性，必须得在布局文件中添加schemas声明xmlns:dict="http://schemas.android.com/apk/res-auto"
+
+
+
+## 4 绘制流程
+
+![](http://ww1.sinaimg.cn/large/6ab93b35gy1fikjvk8monj20fc0heaay.jpg)
+
+## 5 重要函数介绍
+### 5.1 构造函数
+	//在代码中创建时使用
+	public void SampleView(Context context) {}
+	//在xml中使用时使用,关于属性会通过attrs传入
+	public void SampleView(Context context, AttributeSet attrs) {}  
+	public void SampleView(Context context, AttributeSet attrs, int defStyleAttr) {}  
+	public void SampleView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {}   
+
+
+### 5.2 onSizeChanged
+在视图大小发生改变时调用
+
+
+## 6 Canvas 
