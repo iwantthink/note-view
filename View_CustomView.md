@@ -53,6 +53,3 @@ View内部已经提供了post系列的方法了，完全可以替代Handler使�
 
 ### 5.2 onSizeChanged
 在视图大小发生改变时调用
-
-
-## 6 Canvas 
