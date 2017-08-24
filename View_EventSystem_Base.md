@@ -51,25 +51,26 @@ android将事件信息封装成这个类，然后给我们你使用，我们可�
 
 ### 主要的事件类型有:
 
-ACTION_DOWN: 表示用户开始触摸.
+ACTION\_DOWN: 表示用户开始触摸.
 
-ACTION_MOVE: 表示用户在移动(手指或者其他)
+ACTION\_MOVE: 表示用户在移动(手指或者其他)
 
-ACTION_UP:表示用户抬起了手指
+ACTION\_UP:表示用户抬起了手指
 
-ACTION_CANCEL:表示手势被取消了,一些关于这个事件类型的讨论见:http://stackoverflow.com/questions/11960861/what-causes-a-motionevent-action-cancel-in-android
+ACTION\_CANCEL:表示手势被取消了,一些关于这个事件类型的讨论见:  
+[what-causes-a-motionevent-action-cancel-in-android](http://stackoverflow.com/questions/11960861/what-causes-a-motionevent-action-cancel-in-android)
 
 还有一个不常见的:
 
-ACTION_OUTSIDE: 表示用户触碰超出了正常的UI边界.
+ACTION\_OUTSIDE: 表示用户触碰超出了正常的UI边界.
 
 但是对于多点触控的支持,Android加入了以下一些事件类型.来处理,如另外有手指按下了,
 
 有的手指抬起来了.等等:
 
-ACTION_POINTER_DOWN:有一个非主要的手指按下了.
+ACTION\_POINTER\_DOWN:有一个非主要的手指按下了.
 
-ACTION_POINTER_UP:一个非主要的手指抬起来了
+ACTION\_POINTER\_UP:一个非主要的手指抬起来了
 
 另外我们可以通过getX,getY，getRawX,getRawY来获取坐标，前者获取的是相对于当前view的左上角的坐标，后者获取的是相对于手机屏幕左上角的坐标。也可以理解为一个获取手指落在view上的坐标，一个获取手机落在屏幕上的坐标。
 
@@ -171,7 +172,7 @@ ACTION_POINTER_UP:一个非主要的手指抬起来了
 
 >08-14 10:37:18.109  12347-12347/com.marenbo.www.example D/VelocityTrackerView﹕ resume:true
 
-我的猜测是：onSingleTapUp只是消耗ACTION_UP这个事件，但是一个事件肯定是从ACTION_DOWN开始，然后有零个或者多个ACTION_MOVE，最后是ACTION_UP结束。然而在ACTION_DOWN的时候，我们并没有消耗它，所以返回了false，那么接下来同一个事件序列中的事件就都不会给到当前view了。我的解决办法是，如果你需要用到onSingleTapUp这一类的方法，那么就将onDown（）这个回调中返回true，或者你明确所有的事件都要view来解决 可以在onTouchEvent中直接返回true。
+我的猜测是：onSingleTapUp只是消耗ACTION\_UP这个事件，但是一个事件肯定是从ACTION\_DOWN开始，然后有零个或者多个ACTION_MOVE，最后是ACTION\_UP结束。然而在ACTION\_DOWN的时候，我们并没有消耗它，所以返回了false，那么接下来同一个事件序列中的事件就都不会给到当前view了。我的解决办法是，如果你需要用到onSingleTapUp这一类的方法，那么就将onDown（）这个回调中返回true，或者你明确所有的事件都要view来解决 可以在onTouchEvent中直接返回true。
 
 	 private GestureDetector mGestureDetector;
 
@@ -253,7 +254,7 @@ ACTION_POINTER_UP:一个非主要的手指抬起来了
         return false;
     }
 
-   /**
+   	/**
      * 双击,由2次连续的组成，它不可能和onSingleTapConfirmed共存
      */
     @Override
@@ -268,11 +269,7 @@ ACTION_POINTER_UP:一个非主要的手指抬起来了
     public boolean onDoubleTapEvent(MotionEvent e) {
         return false;
     }
-    @Override
-    public boolean onDoubleTapEvent(MotionEvent e) {
-        return false;
-    }
-
+ 
 
 
 ----------
@@ -319,7 +316,9 @@ scrollTo:
     }
 
 
-可以看到scrollBy其实也是调用的scrollTo，在滑动过程中mScrollX,mScrollY这俩个值，分别等于view的左边缘到View内容左边缘的水平方向距离，View的上边缘到view内容上边缘的垂直方向距离。注意使用scrollTo和scrollBy这俩个方法只能改变view的内容的位置而不能改变view在布局中的位置。
+可以看到scrollBy其实也是调用的scrollTo，在滑动过程中mScrollX,mScrollY这俩个值，分别等于**view的左边缘到View内容左边缘的水平方向距离**，View的上边缘到view内容上边缘的垂直方向距离。注意使用scrollTo和scrollBy这俩个方法只能改变view的内容的位置而不能改变view在布局中的位置。  
+
+View的左边缘如果在内容左边缘的 右边，mScrollX 为正，所以scrollTo(正数)其实是往左移动。。
 
 ### 2.使用动画
 使用view动画，属性动画俩种。

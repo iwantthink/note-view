@@ -88,7 +88,7 @@ viewGroup会在俩种情况下去判断是否需要拦截当前事件
             }
 
 
-这里有一种特殊情况，FLAG_DISALLOW_INTERCEPT标志位，通过requestDisallowInterceptTouchEvent方法设置后，ViewGroup无法拦截除了ACTION_DOWN 之外的事件，因为如果是ACTION_DOWN这个事件会重置FLAG_DISALLOW_INTERCEPT这个标志位，将导致View中设置的这个标记位无效。因此当面对ACTION_DOWN时，ViewGroup总是会调用自己的onInterceptTouchEvent方法来询问自己是否要拦截事件。
+这里有一种特殊情况，FLAG\_DISALLOW\_INTERCEPT标志位，通过requestDisallowInterceptTouchEvent方法设置后，ViewGroup无法拦截除了ACTION\_DOWN 之外的事件，因为如果是ACTION\_DOWN这个事件会重置FLAG\_DISALLOW\_INTERCEPT这个标志位，将导致View中设置的这个标记位无效。因此当面对ACTION\_DOWN时，ViewGroup总是会调用自己的onInterceptTouchEvent方法来询问自己是否要拦截事件。
 	     
 
 	 // Handle an initial down.
@@ -121,7 +121,7 @@ viewGroup会在俩种情况下去判断是否需要拦截当前事件
             }
 
 
-### 5.如果view不消耗除ACTION_DOWN意外的其他事件，那么这个点击事件会消失，此时父元素的onTouchEvent并不会被调用，并且当前view可以持续收到后续的事件，最终这些消失的点击事件会传递给Activity处理。
+### 5.如果view不消耗除ACTION_DOWN以外的其他事件，那么这个点击事件会消失，此时父元素的onTouchEvent并不会被调用，并且当前view可以持续收到后续的事件，最终这些消失的点击事件会传递给Activity处理。
 
 ### 6.ViewGroup默认不拦截任何事件！Android源码中ViewGroup的onInterceptTouchEvent方法默认返回的是false。
 
