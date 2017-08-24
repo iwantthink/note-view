@@ -380,6 +380,8 @@ View的draw代码：
 
 View绘制过程是通过dispatchDraw来实现的，dispatchDraw会遍历调用所有子元素的draw方法。  
 
+### 3.4 setWillNotDraw
+
 View有一个特殊的方法**setWillNotDraw()**,如果一个view不需要绘制任何内容，那么设置这个标志位true，系统会进行优化！默认情况下，view 没有启用这个标志，viewgroup默认启用这个标志。  
 当我们的自定义控件继承自viewGroup并且本身不具有绘制功能时，可以开启这个标志。另外当明确知道一个viewgroup 需要通过onDraw来进行绘制内容时，需要关闭这个标志。。。  
 
