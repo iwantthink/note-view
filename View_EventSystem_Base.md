@@ -624,26 +624,30 @@ Region 有setPath(Path p , Region r), 可以将Path 转成Region，然后通过c
 
 获取 位置信息时的坐标是 默认的左上角，当我们对画布进行一些 translate,scale,skew,rotate之后，画布坐标系 就和 位置坐标系不同了
 
-解决办法：  
+- **解决办法**：  
 既然获取到的位置是 根据位置坐标系得到的，那么 我们可以将位置 通过 一定的变化变成 相对 画布坐标系的。  
 例如：画布坐标系 平移了(transX,transY) ,位置坐标系的（x,y）点,我们可使用Matrix 完成坐标映射+数值转换。  
 通过canvas.getMatrix()获取到 canvas 经过变换的 Matrix ,然后将该Matrix 经过invert()操作，得到逆矩阵！然后再通过mapPoints()方法，将(x,y)点经过Matrix变化之后的点求出  
 
 
-	canvas.save();
-    canvas.translate(mWidth / 2, mHeight / 2);
-    Matrix matrix = new Matrix();
-    canvas.getMatrix().invert(matrix);
-    float[] arrary = new float[]{mX, mY};
-    matrix.mapPoints(arrary);//这一步就是将原先的坐标 转成 相对画布的坐标
-    canvas.drawCircle(arrary[0], arrary[1], 10, mPaint);
-    canvas.restore();
+		canvas.save();
+    	canvas.translate(mWidth / 2, mHeight / 2);
+    	Matrix matrix = new Matrix();
+    	canvas.getMatrix().invert(matrix);
+   		float[] arrary = new float[]{mX, mY};
+    	matrix.mapPoints(arrary);//这一步就是将原先的坐标 转成 相对画布的坐标
+    	canvas.drawCircle(arrary[0], arrary[1], 10, mPaint);
+    	canvas.restore();
 
 
 
+## 9 硬件加速
 
+- 硬件加速在4.0以上默认开启
 
+硬件加速干了一件非常精明的事情，把所有画布坐标系都设置为屏幕(物理)坐标系，之后在 View 绘制区域设置一个遮罩，保证绘制内容不会超过 View 自身的大小，这样就直接跳过坐标转换过程，可以节省坐标系之间数值转换耗费的时间。因此导致了以下问题：
 
-
-
-
+1. 开启硬件加速情况下 event.getX() 和 不开启情况下 event.getRawX() 等价，获取到的是屏幕(物理)坐标   
+2. 开启硬件加速情况下 event.getRawX() 数值是一个错误数值，因为本身就是全局的坐标又叠加了一次 View 的偏移量，所以肯定是不正确的  
+3. 从 Canvas 获取到的 Matrix 是全局的，默认情况下 x,y 偏移量始终为0，因此你不能从这里拿到当前 View 的偏移量  
+4. 由于其使用的是遮罩来控制绘制区域，所以如果重绘 path 时，如果 path 区域变大，但没有执行单步操作会导致 path 绘制不完整或者看起来比较奇怪
