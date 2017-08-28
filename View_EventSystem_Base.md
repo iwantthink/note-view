@@ -396,6 +396,10 @@ android将事件信息封装成这个类，然后给我们你使用，我们可�
 ----------
 建议：如果只是监听滑动相关的，建议自己在onTouchEvent中实现，如果要监听双击这种行为的话，就使用GestureDetector
 
+
+## 5.1 构造函数
+
+
 ## 6.view的滑动
 
 ### 1.scrollTo,scrollBy
@@ -651,3 +655,125 @@ Region 有setPath(Path p , Region r), 可以将Path 转成Region，然后通过c
 2. 开启硬件加速情况下 event.getRawX() 数值是一个错误数值，因为本身就是全局的坐标又叠加了一次 View 的偏移量，所以肯定是不正确的  
 3. 从 Canvas 获取到的 Matrix 是全局的，默认情况下 x,y 偏移量始终为0，因此你不能从这里拿到当前 View 的偏移量  
 4. 由于其使用的是遮罩来控制绘制区域，所以如果重绘 path 时，如果 path 区域变大，但没有执行单步操作会导致 path 绘制不完整或者看起来比较奇怪
+
+
+## 10 多点触控进阶
+- Android 2.0 开始引入
+
+### 10.1 index和pointID规则
+
+#### 10.1.1 从0开始，自动增长  
+>第1个手指按下	ACTION\_DOWN (0x00000000)  
+>第2个手指按下	ACTION\_POINTER\_DOWN (0x00000105)  
+>第3个手指按下	ACTION\_POINTER\_DOWN (0x00000205)  
+>第4个手指按下	ACTION\_POINTER\_DOWN (0x00000305)  
+
+#### 10.1.2 如果之前落下的手指抬起,后面手指的index会随之减小  
+>第1个手指按下	ACTION\_DOWN (0x00000000)  
+>第2个手指按下	ACTION\_POINTER\_DOWN (0x00000105)  
+>第3个手指按下	ACTION\_POINTER\_DOWN (0x00000205)   
+>第2个手指抬起	ACTION\_POINTER\_UP (0x00000106)  
+>第3个手指抬起	ACTION\_POINTER\_UP (0x00000106)  
+
+#### 10.1.3  index变化趋向于第一次落下的数值（落下手指时，前面有空缺的 会优先填补空缺）
+>第1个手指按下	ACTION\_DOWN (0x0000 **00**00)  
+>第2个手指按下	ACTION\_POINTER\_DOWN (0x0000 **01**05)    
+>第3个手指按下	ACTION\_POINTER\_DOWN (0x0000 **02**05)    
+>第2个手指抬起	ACTION\_POINTER\_UP (0x0000 **01**06)  
+
+>第4个手指按下	ACTION\_POINTER\_DOWN (0x0000 **01**05)  
+>第3个手指抬起	ACTION\_POINTER\_UP (0x0000 **02**06)  
+ 
+
+即手指抬起时的 Index 会趋向于和按下时相同，虽然在手指数量不足时，Index 会变小，但是当手指变多时，Index 会趋向于保持和按下时一样。
+
+
+
+#### 10.1.4 对move事件无效
+取得的ACTION_MOVE事件  始终为0x0000 0002,也就是说，在move时 你无论移动哪个手指，getActionIndex()获取到的始终是数值0  
+
+区分move事件是哪个手指触发的，需要使用pointId, pointID 和index 最大的区别就是 pointId 是不变的，始终为第一次落下时的数值，不会受到其他手指抬起和落下的影响  
+
+#### 10.1.5 pointerId和index的异同
+- 相同点： 
+	1. 从 0 开始，自动增长。  
+	2. 落下手指时优先填补空缺(填补之前抬起手指的编号)。
+
+- 不同点：
+	1. Index 会变化，pointerId 始终不变。
+
+
+### 10.2 Move相关事件  
+#### 10.2.1 actionIndex 和 pointerIndex
+在move中无法取得actionIndex，需要使用pinterIndex  
+> event.getX(int pointerIndex)
+> event.getY(int pointerIndex)
+
+actionIndex和pointerIndex区别不大，俩者**数值是相同的**，可以将pointerIndex认为是为move事件准备的actionIndex
+
+#### 10.2.2 pointerIndex 和pointerId  
+
+通常情况下,pinterIndex和pointerId是相同的，但是也可能会因某些手指的抬起而变得不同
+
+>pointerIndex	用于获取具体事件，可能会随着其他手指的抬起和落下而变化  
+>pointerId	用于识别手指，手指按下时产生，手指抬起时回收，期间始终不变
+
+pointerIndex和pointerId 互相转换的方法
+
+>getPointerId(int pointerIndex)	获取一个指针(手指)的唯一标识符ID，在手指按下和抬起之间ID始终不变。  
+>findPointerIndex(int pointerId)	通过 pointerId 获取到当前状态下 pointIndex，之后通过 pointIndex 获取其他内容。
+
+
+#### 10.2.3 遍历多点触控
+通过遍历pointerCount获取到所有的pointerIndex，同时通过pointerIndex来获取pointerId，可以通过不同手指抬起和按下来观察pointerIndex和pointerId的变化
+
+	switch (event.getActionMasked()) {
+    case MotionEvent.ACTION_MOVE:
+        for (int i = 0; i < event.getPointerCount(); i++) {
+            Log.i("TAG", "pointerIndex="+i+", pointerId="+event.getPointerId(i));
+          	// TODO
+        }
+	}
+
+#### 10.2.4 在多点触控中追踪单个手指
+
+	// 用于判断第2个手指是否存在
+    boolean haveSecondPoint = false;
+
+    // 记录第2个手指第位置
+    PointF point = new PointF(0, 0);
+
+	@Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int index = event.getActionIndex();
+
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_POINTER_DOWN:
+                // 判断是否是第2个手指按下
+                if (event.getPointerId(index) == 1){
+                    haveSecondPoint = true;
+                    point.set(event.getY(), event.getX());
+                }
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                // 判断抬起的手指是否是第2个
+                if (event.getPointerId(index) == 1){
+                    haveSecondPoint = false;
+                    point.set(0, 0);
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (haveSecondPoint) {
+                    // 通过 pointerId 来获取 pointerIndex
+                    int pointerIndex = event.findPointerIndex(1);
+                    // 通过 pointerIndex 来取出对应的坐标
+                    point.set(event.getX(pointerIndex), event.getY(pointerIndex));
+                }
+                break;
+        }
+
+        invalidate();   // 刷新
+
+        return true;
+    }
+
