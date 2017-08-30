@@ -269,9 +269,19 @@ android将事件信息封装成这个类，然后给我们你使用，我们可�
  > 
  > You may only use this constructor from a UI thread (this is the usual situation).
 
-手势检测，只能在UI线程中创建，用来辅助检测用户的单击，滑动，长按，双击等行为。通过这个类消耗了事件之后需要将结果返回。
+手势检测，**只能在UI线程中创建**，用来辅助检测用户的单击，滑动，长按，双击等行为。通过这个类消耗了事件之后需要将结果返回。
 
-使用方法：创建GestureDetector(),并且实现OnGestureListener接口，注意有个小bug的解决,在View的onTouchEvent中，我们将事件传递给GestureDetector 来进行处理，但是如果我在onSingleTapUp中想要消耗这个事件，返回true这个值 没有起到效果，看一下log
+
+- 相关方法：   
+	setIsLongpressEnabled	通过布尔值设置是否允许触发长按事件，true 表示允许，false 表示不允许。  
+	isLongpressEnabled	判断当前是否允许触发长按事件，true 表示允许，false 表示不允许。  
+	onTouchEvent	这个是其中一个重要的方法，在最开始已经演示过使用方式了。  
+	onGenericMotionEvent	这个是在 API 23 之后才添加的内容，主要是为 OnContextClickListener 服务的，暂时不用关注。  
+	setContextClickListener	设置 ContextClickListener 。  
+	setOnDoubleTapListener	设置 OnDoubleTapListener 。  
+
+
+- 使用方法：创建GestureDetector(),并且实现OnGestureListener接口，注意有个小bug的解决,在View的onTouchEvent中，我们将事件传递给GestureDetector 来进行处理，但是如果我在onSingleTapUp中想要消耗这个事件，返回true这个值 没有起到效果，看一下log
 
 
 	    @Override
@@ -284,18 +294,20 @@ android将事件信息封装成这个类，然后给我们你使用，我们可�
         return resume;
     }
 
->08-14 10:32:01.109    9925-9925/com.marenbo.www.example D/VelocityTrackerView﹕ resume:false
+	>08-14 10:32:01.109    9925-9925/com.marenbo.www.example D/VelocityTrackerView﹕ resume:false
+	
+	可以看到这时候返回的resume并不是预期中的true.然后我们将onTouchEvent中的值手动设置为true之后，看一下log的值
+	>08-14 10:37:18.019  12347-12347/com.marenbo.www.example D/VelocityTrackerView﹕ resume:false
 
-可以看到这时候返回的resume并不是预期中的true.然后我们将onTouchEvent中的值手动设置为true之后，看一下log的值
->08-14 10:37:18.019  12347-12347/com.marenbo.www.example D/VelocityTrackerView﹕ resume:false
+	>08-14 10:37:18.109  12347-12347/com.marenbo.www.example D/VelocityTrackerView﹕ onSingleTapUp
 
->08-14 10:37:18.109  12347-12347/com.marenbo.www.example D/VelocityTrackerView﹕ onSingleTapUp
+	>08-14 10:37:18.109  12347-12347/com.marenbo.www.example D/VelocityTrackerView﹕ resume:true
 
->08-14 10:37:18.109  12347-12347/com.marenbo.www.example D/VelocityTrackerView﹕ resume:true
+	我的猜测是：onSingleTapUp只是消耗ACTION\_UP这个事件，但是一个事件肯定是从ACTION\_DOWN开始，然后有零个或者多个ACTION_MOVE，最后是ACTION\_UP结束。然而在ACTION\_DOWN的时候，我们并没有消耗它，所以返回了false，那么接下来同一个事件序列中的事件就都不会给到当前view了。我的解决办法是，如果你需要用到onSingleTapUp这一类的方法，那么就将onDown（）这个回调中返回true，或者你明确所有的事件都要view来解决 可以在onTouchEvent中直接返回true。
 
-我的猜测是：onSingleTapUp只是消耗ACTION\_UP这个事件，但是一个事件肯定是从ACTION\_DOWN开始，然后有零个或者多个ACTION_MOVE，最后是ACTION\_UP结束。然而在ACTION\_DOWN的时候，我们并没有消耗它，所以返回了false，那么接下来同一个事件序列中的事件就都不会给到当前view了。我的解决办法是，如果你需要用到onSingleTapUp这一类的方法，那么就将onDown（）这个回调中返回true，或者你明确所有的事件都要view来解决 可以在onTouchEvent中直接返回true。
+完整代码:  
 
-	 private GestureDetector mGestureDetector;
+	private GestureDetector mGestureDetector;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -397,7 +409,117 @@ android将事件信息封装成这个类，然后给我们你使用，我们可�
 建议：如果只是监听滑动相关的，建议自己在onTouchEvent中实现，如果要监听双击这种行为的话，就使用GestureDetector
 
 
-## 5.1 构造函数
+### 5.1 构造函数
+
+	GestureDetector(Context context, GestureDetector.OnGestureListener listener)  
+	GestureDetector(Context context, GestureDetector.OnGestureListener listener, Handler handler)
+
+第二种构造方法，需要一个Handler  主要是需要一个looper。默认的GestureDetector 是要在主线程中创建的，它内部创建的Handler会自动取获取主线程的looper。 重点在于Looper，也可以手动调用Looper.prepare()
+
+
+### 5.2 手势监听器
+
+>OnContextClickListener	这个很容易让人联想到ContextMenu，然而它和ContextMenu并没有什么关系，它是在Android6.0(API 23)才添加的一个选项，是用于检测外部设备上的按钮是否按下的，例如蓝牙触控笔上的按钮，一般情况下，忽略即可。  
+>
+>OnDoubleTapListener	双击事件，有三个回调类型：双击(DoubleTap)、单击确认
+(SingleTapConfirmed) 和 双击事件回调(DoubleTapEvent)   
+
+>OnGestureListener	手势检测，主要有以下类型事件：按下(Down)、 一扔(Fling)、长按(LongPress)、滚动(Scroll)、触摸反馈(ShowPress) 和 单击抬起(SingleTapUp)   
+>
+>SimpleOnGestureListener	这个是上述三个接口的空实现，一般情况下使用这个比较多，也比较方便。
+
+#### 5.2.1 onContextClickListener
+OnContextClickListener 主要是用于检测外部设备按钮的  
+关于它需要注意一点，如果侦听 onContextClick(MotionEvent)，则必须在 View 的 onGenericMotionEvent(MotionEvent)中调用 GestureDetector 的 OnGenericMotionEvent(MotionEvent)。
+
+#### 5.2.2 onDoubleTapListener
+用于检测双击事件，有三个回调接口  onDoubleTap,onDoubleTapEvent,onSingleTapConfirmed
+
+- onClickListener 理论上也可以实现监听单击事件，但是要解决俩个问题：1.在事件传递中，如果onTouchListener 被设置，那么就不会去执行onTouchEvent(onClickListener也在这里)。 2.如果需要同时监听 单击和双击 ，onClickListener 实现起来非常麻烦。
+
+- onSingleTapConfirmed 回调函数会在单击事件发生300s后触发,因为需要确认后续没有其他事件发生
+
+- onDoubleTapEvent 用于在双击事件确定发生时，对第二次按下产生的MotionEvent 信息进行回调，onDoubleTapEvent是在第二次down事件触发时 实时回调的。  
+	如果我们要双击事件在 第二次up事件触发时，再回调，就需要在onDoubleTapEvent中处理
+
+		final GestureDetector detector = new GestureDetector(MainActivity.this, new GestureDetector.SimpleOnGestureListener() {
+    	@Override public boolean onDoubleTap(MotionEvent e) {
+        	Log.e("第二次按下时触发");
+        	return super.onDoubleTap(e);
+    	}
+
+    	@Override public boolean onDoubleTapEvent(MotionEvent e) {
+        switch (e.getActionMasked()) {
+            case MotionEvent.ACTION_UP:
+                Log.e("第二次抬起时触发");
+                break;
+        }
+        	return super.onDoubleTapEvent(e);
+    	}
+		});
+
+
+
+#### 5.2.3 onGestureListener
+
+主要检测以下类型事件：按下(Down)、 一扔(Fling)、长按(LongPress)、滚动(Scroll)、触摸反馈(ShowPress) 和 单击抬起(SingleTapUp)。
+
+##### 5.2.3.1 onDown  
+为了确保View消费了事件,也就是能接收事件序列(down-move-up)，需要消费掉down事件以确保view能接收到后续事件:  
+1.让view可点击，因为可点击状态会默认消费down事件     
+2.手动消费掉down事件，返回true
+
+  
+##### 5.2.3.2 onFling
+常见的场景就是在 ListView 或者 RecyclerView 上快速滑动时手指抬起后它还会滚动一段时间才会停止
+
+	@Override
+	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float
+        velocityY) {
+    	return super.onFling(e1, e2, velocityX, velocityY);
+	}
+
+
+>e1	手指按下时的 Event。  
+>e2	手指抬起时的 Event。  
+>velocityX	在 X 轴上的运动速度(像素／秒)。  
+>velocityY	在 Y 轴上的运动速度(像素／秒)。  
+
+
+##### 5.2.3.3 onLongPress
+监测长按事件..即手指按下后不抬起，在一段时间后会触发该事件。
+
+##### 5.2.3.4 onScroll
+监听滚动事件
+
+	@Override
+	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float 
+        distanceY) {
+	    return super.onScroll(e1, e2, distanceX, distanceY);
+	}
+
+
+>e1	手指按下时的Event  
+>e2	手指抬起时的Event  
+>distanceX	在 X 轴上划过的距离  
+>distanceY	在 Y 轴上划过的距离  
+
+
+##### 5.2.3.5 onShowPress
+它是用户按下时的一种回调，主要作用是给用户提供一种视觉反馈，可以在监听到这种事件时可以让控件换一种颜色，或者产生一些变化，告诉用户他的动作已经被识别。
+
+不过这个消息和 onSingleTapConfirmed 类似，也是一种延时回调，延迟时间是 180 ms，假如用户手指按下后立即抬起或者事件立即被拦截，时间没有超过 180 ms的话，这条消息会被 remove 掉，也就不会触发这个回调。
+
+
+##### 5.2.3.6 onSingleTapUp
+- onSingleTapUp 单击事件抬起   
+	onClick  单击事件  
+	onSingleTapConfirmed 单击事件确认(300ms延迟)
+
+#### 5.3 SimpleOnGestureListener
+方便使用！
+
+
 
 
 ## 6.view的滑动
