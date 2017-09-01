@@ -773,6 +773,16 @@ Region 有setPath(Path p , Region r), 可以将Path 转成Region，然后通过c
 
 - [android-官方 硬件加速说明](https://developer.android.com/guide/topics/graphics/hardware-accel.html)
 
+硬件加速分为 全局(Application),Activity,Window,View四个层级  
+1. AndroidManifest.xml文件 application标签添加 android:hardwareAccelerated =true 属性
+2. AndroidManifest.xml文件 Activity 标签下使用 hardwareAcceletared 
+3. Window层级开启硬件加速(不支持关闭)
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED，WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
+4. View级别关闭硬件 
+		setLayerType(View.LAYER_TYPE_SOFTWARE,null)
+	或者在布局文件中，给View 添加属性 android:layerType = "software"
+
+
 硬件加速干了一件非常精明的事情，把所有画布坐标系都设置为屏幕(物理)坐标系，之后在 View 绘制区域设置一个遮罩，保证绘制内容不会超过 View 自身的大小，这样就直接跳过坐标转换过程，可以节省坐标系之间数值转换耗费的时间。因此导致了以下问题：
 
 1. 开启硬件加速情况下 event.getX() 和 不开启情况下 event.getRawX() 等价，获取到的是屏幕(物理)坐标   
