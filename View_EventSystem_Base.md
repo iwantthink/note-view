@@ -1,4 +1,4 @@
-# View
+# View事件,硬件加速
 view是什么呢？它是Android中所有控件的基类，可以理解为所有控件的抽象，同时它有一个子类ViewGroup，代表一组view，个人觉得可以理解为布局，那么就代表了控件可以是单个的也可以是一组的。//TO-DO
 
 
@@ -769,7 +769,7 @@ Region 有setPath(Path p , Region r), 可以将Path 转成Region，然后通过c
 
 ## 9 硬件加速
 
-- 硬件加速在4.0以上默认开启
+- 硬件加速在4.0以上默认开启(API14,API11 开始加入了GPU加速支持但是未默认开启)
 
 - [android-官方 硬件加速说明](https://developer.android.com/guide/topics/graphics/hardware-accel.html)
 
