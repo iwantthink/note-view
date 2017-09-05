@@ -193,8 +193,8 @@ public class MyLinearLayout extends LinearLayout {
 ### 2.1 角度和弧度的换算关系
 360（角度） = 2π(弧度) 
 >rad是弧度，deg是角度  
->rad= deg * π / 180  
->deg = rad * 180 /π
+>rad= deg \* π / 180  
+>deg = rad \* 180 / π
 
 
 ## 3 颜色
