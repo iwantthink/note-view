@@ -1,12 +1,12 @@
 # 自定义View
 ---
-## 1 自定义view的分类
+## 1.自定义view的分类
 ### 1.1 继承View重写onDraw方法
 ### 1.2 继承ViewGroup派生特殊的Layout
 ### 1.3 继承特定的View(比如TextView)
 ### 1.4 继承特定的ViewGroup(比如LinearLayout)
 
-## 2 自定义Vie注意事项
+## 2.自定义Vie注意事项
 ### 2.1 让View支持wrap\_content
 wrap\_content根据getChildMeasuredSpec 生成的是AT_MOST模式的measureSpec,默认的View的measure过程，AT\_MOST 和EXACTLY 是同样的处理方式.
 
@@ -21,7 +21,7 @@ View内部已经提供了post系列的方法了，完全可以替代Handler使�
 
 ### 2.5 View带有滑动嵌套时，需要处理好滑动冲突！
 
-## 3自定义属性的使用
+## 3.自定义属性的使用
 1. 在values目录下面 创建自定义属性的XML文件，例如attrs.xml,DictView 是这个自定义属性集合的名字，然后这个集合里面可以有很多的自定义属性。 自定义属性的包括名字和格式
 	    
 		<declare-styleable name="DictView">
