@@ -43,7 +43,7 @@ x和y分别代表View左上角的坐标，translationX/Y代表各自方向上的
 >y = top +translationY;
 
 
-需要注意的是在view平移的过程中，xy是不会改变的，改变的是位移，在属性动画中改变的其实也是translationX/Y这俩个值。
+需要注意的是在view平移的过程中，left/top是不会改变的，改变的是x,y,translationX,translationY，在属性动画中改变的其实也是translationX/Y这俩个值。
 
 ## 2.MotionEvent
 
@@ -65,17 +65,19 @@ android将事件信息封装成这个类，然后给我们你使用，我们可�
 5. 还有一个不常见的:
 
 	ACTION\_OUTSIDE: 表示用户触碰超出了正常的UI边界.
-
 	
 	[参考:OUTSIDE_ACTION](https://stackoverflow.com/questions/8384067/how-to-dismiss-the-dialog-with-click-on-outside-of-the-dialog)  
+
 	>设置视图的 WindowManager 布局参数的 flags为FLAG\_WATCH\_OUTSIDE\_TOUCH，这样点击事件发生在这个视图之外时，该视图就可以接收到一个 ACTION\_OUTSIDE 事件。
 
-    
 6. ACTION\_POINTER\_DOWN:有一个非主要的手指按下了.
 
 7. ACTION\_POINTER\_UP:一个非主要的手指抬起来了
 
-另外我们可以通过getX,getY，getRawX,getRawY来获取坐标，前者获取的是相对于当前view的左上角的坐标，后者获取的是相对于手机屏幕左上角的坐标。也可以理解为一个获取手指落在view上的坐标，一个获取手机落在屏幕上的坐标。
+### 通过getX,getY，getRawX,getRawY来获取坐标
+
+- 前者获取的是相对于当前view的左上角的坐标
+- 后者获取的是相对于手机屏幕左上角的坐标。也可以理解为一个获取手指落在view上的坐标，一个获取手机落在屏幕上的坐标。
 
 ### 2.1多点触控  
 >getActionMasked()	与 getAction() 类似，多点触控必须使用这个方法获取事件类型。 
