@@ -41,7 +41,100 @@ View内部已经提供了post系列的方法了，完全可以替代Handler使�
 
 ![](http://ww1.sinaimg.cn/large/6ab93b35gy1fikjvk8monj20fc0heaay.jpg)
 
+**生命周期:**
+
+	public class LifeCycleView extends View {
+
+    private static final String TAG = LifeCycleView.class.getSimpleName();
+
+    public LifeCycleView(Context context) {
+        super(context);
+
+        Log.d(TAG, "construction with one parameter");
+    }
+
+    public LifeCycleView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+
+        Log.d(TAG, "construction with two parameter");
+    }
+
+    //xml布局被view完全解析了之后会调用
+    //也就是说 如果从代码中创建view 不会回调该接口
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+
+        Log.d(TAG, "onFinishInflate");
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        Log.d(TAG, "onMeasure");
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        Log.d(TAG, "onLayout");
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        Log.d(TAG, "onDraw");
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+
+        Log.d(TAG, "onSizeChanged");
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        Log.d(TAG, "onAttachedToWindow");
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        Log.d(TAG, "onDetachedFromWindow");
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+
+        Log.d(TAG, "onWindowVisibilityChanged");
+    }
+	}
+
+看一下log：
+
+	08-14 17:45:58.279  12523-12523/com.marenbo.www.example D/LifeCycleView﹕ construction with two parameter
+	08-14 17:45:58.279  12523-12523/com.marenbo.www.example D/LifeCycleView﹕ onFinishInflate
+	08-14 17:45:58.329  12523-12523/com.marenbo.www.example D/LifeCycleView﹕ onAttachedToWindow
+	08-14 17:45:58.329  12523-12523/com.marenbo.www.example D/LifeCycleView﹕ onWindowVisibilityChanged
+	08-14 17:45:58.329  12523-12523/com.marenbo.www.example D/LifeCycleView﹕ onMeasure
+	08-14 17:45:58.329  12523-12523/com.marenbo.www.example D/LifeCycleView﹕ onMeasure
+	08-14 17:45:58.469  12523-12523/com.marenbo.www.example D/LifeCycleView﹕ onSizeChanged
+	08-14 17:45:58.469  12523-12523/com.marenbo.www.example D/LifeCycleView﹕ onLayout
+	08-14 17:45:58.629  12523-12523/com.marenbo.www.example D/LifeCycleView﹕ onMeasure
+	08-14 17:45:58.629  12523-12523/com.marenbo.www.example D/LifeCycleView﹕ onMeasure
+	08-14 17:45:58.629  12523-12523/com.marenbo.www.example D/LifeCycleView﹕ onLayout
+	08-14 17:45:58.629  12523-12523/com.marenbo.www.example D/LifeCycleView﹕ onDraw
+
 ## 5 重要函数介绍
+[官方API文档---VIEW](https://developer.android.com/reference/android/view/View.html)
 ### 5.1 构造函数
 	//在代码中创建时使用
 	public void SampleView(Context context) {}
@@ -53,3 +146,6 @@ View内部已经提供了post系列的方法了，完全可以替代Handler使�
 
 ### 5.2 onSizeChanged
 在视图大小发生改变时调用
+
+### 5.3 setPivotX()---setPivotY()
+设置View旋转或缩放的中心坐标
